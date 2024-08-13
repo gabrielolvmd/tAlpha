@@ -3,6 +3,7 @@ import { api } from '../service/api';
 import { useNavigate } from 'react-router-dom';
 import './RegisterAccount.css';
 import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
 
 export const RegisterAccount = () => {
@@ -13,7 +14,7 @@ export const RegisterAccount = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await api.post('/api/auth/register', {
@@ -27,8 +28,13 @@ export const RegisterAccount = () => {
       toast.success('Conta registrada com sucesso!');
       navigate('/Home'); 
     } catch (error) {
-      toast.error('Erro ao registrar a conta. Verifique os dados e tente novamente.');
-      console.error("Erro:", error.response ? error.response.data : error.message);
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message || 'Erro ao registrar a conta. Verifique os dados e tente novamente.');
+        console.error("Erro:", error.message);
+      } else {
+        toast.error('Erro inesperado ao registrar a conta.');
+        console.error("Erro desconhecido:", error);
+      }
     }
   };
 

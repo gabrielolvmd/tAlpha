@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../service/api";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
 import "./ProductsList.css";
 
 interface Product {
@@ -18,14 +19,16 @@ export const ProductsList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-
         const response = await api.get('/api/products/get-all-products');
-
         setProducts(response.data.data.products);
-
       } catch (error) {
-        toast.error(error.response?.data?.message || 'Erro ao carregar produtos.');
-        console.error("Erro:", error.message);
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message || 'Erro ao carregar produtos.');
+          console.error("Erro:", error.message);
+        } else {
+          toast.error('Erro inesperado ao carregar produtos.');
+          console.error("Erro desconhecido:", error);
+        }
       } finally {
         setLoading(false);
       }

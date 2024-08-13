@@ -29,6 +29,7 @@ export const Home = () => {
       navigate("/ProductsList");
     } catch (error) {
       toast.error('Erro ao tentar realizar login.');
+      console.error(error)
     }
   };
 

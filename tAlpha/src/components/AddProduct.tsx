@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { api } from "../service/api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
 
 export const AddProduct = () => {
   const navigate = useNavigate();
@@ -24,7 +25,6 @@ export const AddProduct = () => {
   const handleAddProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-
       await api.post('/api/products/create-product', formData);
 
       toast.success("Produto cadastrado com sucesso!");
@@ -37,8 +37,13 @@ export const AddProduct = () => {
         stock: 0
       });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Erro ao cadastrar produto.');
-      console.error("Erro:", error.message);
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message || 'Erro ao cadastrar produto.');
+        console.error("Erro:", error.message);
+      } else {
+        toast.error('Erro inesperado ao cadastrar produto.');
+        console.error("Erro desconhecido:", error);
+      }
     }
   };
 

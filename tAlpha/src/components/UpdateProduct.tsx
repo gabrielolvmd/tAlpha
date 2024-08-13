@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../service/api";
 import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 export const UpdateProduct = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,21 +18,20 @@ export const UpdateProduct = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const token = localStorage.getItem("authToken");
+       
 
-        const config = token ? {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        } : {};
-
-        const response = await api.get(`/api/products/get-product/${id}`, config);
+        const response = await api.get(`/api/products/get-product/${id}`);
 
         setFormData(response.data.data);
 
       } catch (error) {
-        toast.error('Erro ao carregar os detalhes do produto.');
-        console.error("Erro:", error.message);
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message || 'Erro ao carregar os detalhes do produto.');
+          console.error("Erro:", error.message);
+        } else {
+          toast.error('Erro inesperado ao carregar os detalhes do produto.');
+          console.error("Erro desconhecido:", error);
+        }
       }
     };
 
@@ -55,8 +55,13 @@ export const UpdateProduct = () => {
       navigate("/ProductsList");
 
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Erro ao atualizar produto.');
-      console.error("Erro:", error.message);
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message || 'Erro ao atualizar produto.');
+        console.error("Erro:", error.message);
+      } else {
+        toast.error('Erro inesperado ao atualizar o produto.');
+        console.error("Erro desconhecido:", error);
+      }
     }
   };
 

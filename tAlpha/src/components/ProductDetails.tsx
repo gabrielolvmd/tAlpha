@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../service/api";
 import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 import "./ProductDetails.css";
 
 interface Product {
@@ -20,13 +21,16 @@ export const ProductDetails = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-
         const response = await api.get(`/api/products/get-one-product/${id}`);
-
         setProduct(response.data.data.product);
       } catch (error) {
-        toast.error('Erro ao carregar os detalhes do produto.');
-        console.error("Erro:", error.message);
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message || 'Erro ao carregar os detalhes do produto.');
+          console.error("Erro:", error.message);
+        } else {
+          toast.error('Erro inesperado ao carregar os detalhes do produto.');
+          console.error("Erro desconhecido:", error);
+        }
       } finally {
         setLoading(false);
       }

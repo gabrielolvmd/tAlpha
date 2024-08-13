@@ -1,7 +1,8 @@
-import React from "react";
+
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../service/api";
 import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 export const DeleteProduct = () => {
   const { id } = useParams<{ id: string }>();
@@ -9,15 +10,18 @@ export const DeleteProduct = () => {
 
   const handleDeleteProduct = async () => {
     try {
-
       await api.delete(`/api/products/delete-product/${id}`);
 
       toast.success("Produto deletado com sucesso!");
       navigate("/ProductsList");
-
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Erro ao deletar produto.');
-      console.error("Erro:", error.message);
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message || 'Erro ao deletar produto.');
+        console.error("Erro:", error.message);
+      } else {
+        toast.error('Erro inesperado ao deletar produto.');
+        console.error("Erro desconhecido:", error);
+      }
     }
   };
 
